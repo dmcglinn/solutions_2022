@@ -1,13 +1,13 @@
 ---
 title: "Solutions to the Univariate Models assignment"
-output: html_document
+output: pdf_document
 ---
 ## Univariate Assignment
 
 ```{r, echo=FALSE}
 # setup the R enviornment for kniting markdown doc properly
 library(knitr)
-opts_knit$set(root.dir='../')
+opts_knit$set(root.dir='../', tidy = TRUE)
 ```
 
 Read in tree data, metadata can be found [here](../data/tree_metadata.txt).
@@ -54,23 +54,23 @@ we can call the function like so:
 # we wish to model species cover across all sampled plots
 
 # create site x sp matrix for two species 
-sp_cov = with(trees, tapply(cover, list(plotID, spcode), 
+sp_cov <- with(trees, tapply(cover, list(plotID, spcode), 
                            function(x) round(mean(x))))
-sp_cov = ifelse(is.na(sp_cov), 0, sp_cov)
-sp_cov = data.frame(plotID = row.names(sp_cov), sp_cov)
+sp_cov <- ifelse(is.na(sp_cov), 0, sp_cov)
+sp_cov <- data.frame(plotID = row.names(sp_cov), sp_cov)
 
 # create environmental matrix
-cols_to_select = c('elev', 'tci', 'streamdist', 
+cols_to_select <- c('elev', 'tci', 'streamdist', 
                    'disturb', 'beers')
-env = aggregate(trees[ , cols_to_select], by = list(trees$plotID), 
+env <- aggregate(trees[ , cols_to_select], by = list(trees$plotID), 
                 function(x) x[1])
 names(env)[1] = 'plotID'
 
 # merge species and enviornmental matrices
-site_dat = merge(sp_cov, env, by='plotID')
+site_dat <- merge(sp_cov, env, by='plotID')
 
 # subset species of interest
-abies = site_dat[ , c('ABIEFRA', cols_to_select)]
+abies <- site_dat[ , c('ABIEFRA', cols_to_select)]
 acer  = site_dat[ , c('ACERRUB', cols_to_select)]
 names(abies)[1] = 'cover'
 names(acer)[1] = 'cover'
@@ -105,8 +105,8 @@ be stronger than its raw correlation due to interference from other variables.
 
 ```{r}
 # build OLS models using "." shorthand which is short for all variables in data
-acer_lm = lm(cover ~ . , data=acer)
-abies_lm = lm(cover ~ . , data=abies)
+acer_lm <- lm(cover ~ . , data=acer)
+abies_lm <- lm(cover ~ . , data=abies)
 ```
 
 Let's first examine the overall model fit by examining the predicted-observed (PO) plot: 
@@ -190,7 +190,7 @@ integers 0 to positive infinity so this may provide a good first approximation.
 Your new model calls will look as follows:
 
     ```{r, eval=FALSE}
-    acer_poi = glm(cover ~ tci + elev + ... , data= my_data, 
+    acer_poi <- glm(cover ~ tci + elev + ... , data= my_data, 
                    family='poisson')
     ```
 
@@ -198,7 +198,7 @@ Your new model calls will look as follows:
     pseudo-R-squared statistic (note this is just one of many possible)
 
     ```{r}
-    pseudo_r2 = function(glm_mod) {
+    pseudo_r2 <- function(glm_mod) {
         1 -  glm_mod$deviance / glm_mod$null.deviance
     }
     ```
@@ -208,8 +208,8 @@ Your new model calls will look as follows:
     results much? In what ways? 
 
 ```{r poisson regression}
-acer_poi = glm(cover ~ . , data = acer, family = 'poisson')
-abies_poi = glm(cover ~ . , data = abies, family = 'poisson')
+acer_poi <- glm(cover ~ . , data = acer, family = 'poisson')
+abies_poi <- glm(cover ~ . , data = abies, family = 'poisson')
 ```
 
 Let's examine the predicted-observed plots first to see if they systematic error is better handled. 
@@ -301,7 +301,7 @@ parameter.
 ```{r}
 library(MASS)
 
-abies_nb = glm.nb(cover ~ . , data=abies,
+abies_nb <- glm.nb(cover ~ . , data=abies,
                   control=glm.control(maxit=100))
 AIC(abies_poi)
 AIC(abies_nb)
@@ -320,7 +320,7 @@ library(pscl)
 # in the portion of the model with positive values, and 
 # only include elevation in the model for the zeros. 
 
-abies_zip = zeroinfl(cover ~ . | elev, data=abies)
+abies_zip <- zeroinfl(cover ~ . | elev, data=abies)
 
 AIC(abies_poi)
 AIC(abies_nb)
@@ -366,11 +366,11 @@ plot our predictions against the data. To do so we'll make it a bit easier by
 only considering a zero-inflated Poisson model that only includes elevation.
 
 ```{r}
-abies_elev_gau = glm(cover ~ elev, data=abies, family='gaussian')
-abies_elev_poi = glm(cover ~ elev, data=abies, family='poisson')
-abies_elev_zip = zeroinfl(cover ~ elev | elev, data=abies)
+abies_elev_gau <- glm(cover ~ elev, data=abies, family='gaussian')
+abies_elev_poi <- glm(cover ~ elev, data=abies, family='poisson')
+abies_elev_zip <- zeroinfl(cover ~ elev | elev, data=abies)
 
-abies_newdata = data.frame(elev = seq(min(abies$elev), max(abies$elev),
+abies_newdata <- data.frame(elev = seq(min(abies$elev), max(abies$elev),
                                  length.out=100))
 plot(cover ~ elev, data=abies, xlab='Elevation', 
      ylab='cover', main='Abies fraseri',
@@ -393,7 +393,7 @@ legend('topleft', c('lowess', 'Gaussian', 'Poisson', 'zero-inflated Poisson'),
 Let's examine if the zero-inflated Poisson improves our acer model as well.
 
 ```{r}
-acer_zip = zeroinfl(cover ~ . | elev, data=acer)
+acer_zip <- zeroinfl(cover ~ . | elev, data=acer)
 
 AIC(acer_poi)
 AIC(acer_zip)
@@ -406,11 +406,11 @@ plot(predict(acer_zip), residuals(acer_lm))
 
 
 
-acer_elev_gau = glm(cover ~ elev, data=acer, family='gaussian')
-acer_elev_poi = glm(cover ~ elev, data=acer, family='poisson')
-acer_elev_zip = zeroinfl(cover ~ elev | elev, data=acer)
+acer_elev_gau <- glm(cover ~ elev, data=acer, family='gaussian')
+acer_elev_poi <- glm(cover ~ elev, data=acer, family='poisson')
+acer_elev_zip <- zeroinfl(cover ~ elev | elev, data=acer)
 
-acer_newdata = data.frame(elev = seq(min(acer$elev), max(acer$elev),
+acer_newdata <- data.frame(elev = seq(min(acer$elev), max(acer$elev),
                                  length.out=100))
 
 plot(cover ~ elev, data=acer, xlab='Elevation', 

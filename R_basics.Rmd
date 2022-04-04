@@ -5,11 +5,14 @@ date: "1/14/2016"
 output: pdf_document
 ---
 
+```{r include=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+```
 
 1) What are the names of the columns in this dataset?
 
 ```{r}
-dat = read.csv('http://dmcglinn.github.io/quant_methods/data/tgpp.csv')
+dat <- read.csv('http://dmcglinn.github.io/quant_methods/data/tgpp.csv')
 names(dat)
 ```
 
@@ -84,8 +87,8 @@ useful to add a line to the average richness at each scale
 
 ``` {r}
 #png('../figures/scale_vs_rich_loglog_avg.png')
-rich_avg = tapply(dat$richness, dat$scale, mean)
-scales = as.numeric(names(rich_avg))
+rich_avg <- tapply(dat$richness, dat$scale, mean)
+scales <- as.numeric(names(rich_avg))
 plot(log10(scales), log10(rich_avg), lwd=2, col='red', type='o',
      xlab=expression(log[10]*scale (m^2)), ylab=expression(log[10]*richness))
 #dev.off()

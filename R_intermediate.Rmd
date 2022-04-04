@@ -5,6 +5,10 @@ date: "January 31, 2022"
 output: pdf_document
 ---
 
+```{r include=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+```
+
 Examine the following for loop, and then complete the exercises
 
 ```{r}
